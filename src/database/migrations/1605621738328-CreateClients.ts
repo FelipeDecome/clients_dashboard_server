@@ -1,17 +1,14 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
+import { created_at, id, updated_at } from './defaultColumns';
+
 export default class CreateClients1605621738328 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
         name: 'clients',
         columns: [
-          {
-            name: 'id',
-            type: 'uuid',
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
-          },
+          id,
           {
             name: 'name',
             type: 'varchar',
@@ -21,16 +18,8 @@ export default class CreateClients1605621738328 implements MigrationInterface {
             type: 'uuid',
             isNullable: true,
           },
-          {
-            name: 'created_at',
-            type: 'varchar',
-            default: 'now()',
-          },
-          {
-            name: 'updated_at',
-            type: 'timestamp',
-            default: 'now()',
-          },
+          created_at,
+          updated_at,
         ],
       }),
     );

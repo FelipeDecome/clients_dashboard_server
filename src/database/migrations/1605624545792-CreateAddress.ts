@@ -1,5 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
+import { created_at, id, updated_at } from './defaultColumns';
+
 export default class CreateAddresses1605624545792
   implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -7,12 +9,7 @@ export default class CreateAddresses1605624545792
       new Table({
         name: 'addresses',
         columns: [
-          {
-            name: 'id',
-            type: 'uuid',
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
-          },
+          id,
           {
             name: 'client_id',
             type: 'uuid',
@@ -46,16 +43,8 @@ export default class CreateAddresses1605624545792
             name: 'state',
             type: 'varchar',
           },
-          {
-            name: 'created_at',
-            type: 'varchar',
-            default: 'now()',
-          },
-          {
-            name: 'updated_at',
-            type: 'timestamp',
-            default: 'now()',
-          },
+          created_at,
+          updated_at,
         ],
       }),
     );
