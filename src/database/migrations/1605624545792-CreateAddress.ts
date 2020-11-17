@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-import { created_at, id, updated_at } from './defaultColumns';
+import { created_at, defaultVarcharColumn, id, updated_at } from './utils';
 
 export default class CreateAddresses1605624545792
   implements MigrationInterface {
@@ -14,35 +14,28 @@ export default class CreateAddresses1605624545792
             name: 'client_id',
             type: 'uuid',
           },
-          {
+          defaultVarcharColumn({
             name: 'street',
-            type: 'varchar',
-          },
-          {
+          }),
+          defaultVarcharColumn({
             name: 'number',
-            type: 'varchar',
-          },
-          {
+          }),
+          defaultVarcharColumn({
             name: 'neighborhood',
-            type: 'varchar',
-          },
-          {
+          }),
+          defaultVarcharColumn({
             name: 'complement',
-            type: 'varchar',
             isNullable: true,
-          },
-          {
+          }),
+          defaultVarcharColumn({
             name: 'cep',
-            type: 'varchar',
-          },
-          {
+          }),
+          defaultVarcharColumn({
             name: 'city',
-            type: 'varchar',
-          },
-          {
+          }),
+          defaultVarcharColumn({
             name: 'state',
-            type: 'varchar',
-          },
+          }),
           created_at,
           updated_at,
         ],

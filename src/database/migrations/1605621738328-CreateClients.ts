@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-import { created_at, id, updated_at } from './defaultColumns';
+import { created_at, defaultVarcharColumn, id, updated_at } from './utils';
 
 export default class CreateClients1605621738328 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -9,10 +9,9 @@ export default class CreateClients1605621738328 implements MigrationInterface {
         name: 'clients',
         columns: [
           id,
-          {
+          defaultVarcharColumn({
             name: 'name',
-            type: 'varchar',
-          },
+          }),
           {
             name: 'main_address_id',
             type: 'uuid',

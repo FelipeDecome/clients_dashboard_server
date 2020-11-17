@@ -20,4 +20,19 @@ const updated_at = new TableColumn({
   default: 'now()',
 });
 
-export { id, created_at, updated_at };
+interface DefaultVarcharColumnProps {
+  name: string;
+  isNullable?: boolean;
+}
+
+const defaultVarcharColumn = ({
+  name,
+  isNullable = false,
+}: DefaultVarcharColumnProps): TableColumn =>
+  new TableColumn({
+    name,
+    type: 'varchar',
+    isNullable,
+  });
+
+export { id, created_at, updated_at, defaultVarcharColumn };
