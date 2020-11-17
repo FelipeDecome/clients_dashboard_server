@@ -12,14 +12,12 @@ import Client from './Client';
 @Entity('addresses')
 class Address {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column('uuid')
   client_id: string;
 
-  @ManyToOne(() => Client, client => client.addresses, {
-    eager: true,
-  })
+  @ManyToOne(() => Client, client => client.addresses)
   client: Client;
 
   @Column()
@@ -32,7 +30,7 @@ class Address {
   neighborhood: string;
 
   @Column()
-  complement: string;
+  complement?: string;
 
   @Column()
   cep: string;
