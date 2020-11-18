@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -18,6 +19,7 @@ class Address {
   client_id: string;
 
   @ManyToOne(() => Client, client => client.addresses)
+  @JoinColumn({ name: 'client_id' })
   client: Client;
 
   @Column()

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -16,7 +17,11 @@ class Phone {
   @Column()
   number: string;
 
+  @Column('uuid')
+  client_id: string;
+
   @ManyToOne(() => Client, client => client.phones)
+  @JoinColumn({ name: 'client_id' })
   client: Client;
 
   @CreateDateColumn()

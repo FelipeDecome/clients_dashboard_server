@@ -20,7 +20,6 @@ class Client {
 
   @Column('uuid')
   main_address_id?: string;
-  /* Função no repositório para achar o endereço principal */
 
   @OneToMany(() => Address, address => address.client, { eager: true })
   addresses: Address[];
