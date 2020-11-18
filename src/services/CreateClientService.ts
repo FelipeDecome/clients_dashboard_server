@@ -16,81 +16,52 @@ interface AddressRequest {
 
 interface Request {
   name: string;
-  addresses: AddressRequest[];
+  addresses?: AddressRequest[];
 }
 
 class CreateClientService {
   public async execute({ name, addresses }: Request): Promise<Client> {
-    // const client = clientRepository.create({
-    //   name,
-    // });
-
-    // const addressesDataPromises = addresses.map(async address => {
-    //   const { city, state, cep } = address;
-
-    //   if (!city || !state) {
-    //     const { city: retrievedCity, state: retrievedState } = await findCep(
-    //       cep,
-    //     );
-    //     return {
-    //       ...address,
-    //       city: retrievedCity,
-    //       state: retrievedState,
-    //       client_id: client.id,
-    //     };
-    //   }
-
-    //   return {
-    //     ...address,
-    //     state: state.toUpperCase(),
-    //     client_id: client.id,
-    //   };
-    // });
-
-    // const addressesData = await Promise.all(addressesDataPromises);
-
-    // const createdAddresses = addressesData.map(address =>
-    //   addressRepository.create(address),
-    // );
-
     const newClient = await getManager().transaction(
       async transactionEntityManager => {
-        const clientData = transactionEntityManager.create(Client, {
+        const clientEntity = transactionEntityManager.create(Client, {
           name,
         });
 
-        const client = await transactionEntityManager.save(clientData);
+        const client = await transactionEntityManager.save(clientEntity);
 
-        const addressesData = await Promise.all(
-          addresses.map(async address => {
-            const { city, state, cep } = address;
+        if (addresses) {
+          const addressesData = await Promise.all(
+            addresses.map(async address => {
+              const { city, state, cep } = address;
 
-            if (!city || !state) {
-              const {
-                city: retrievedCity,
-                state: retrievedState,
-              } = await findCep(cep);
+              if (!city || !state) {
+                const {
+                  city: retrievedCity,
+                  state: retrievedState,
+                } = await findCep(cep);
+
+                return {
+                  ...address,
+                  city: city || retrievedCity,
+                  state: state?.toUpperCase() || retrievedState,
+                  client_id: client.id,
+                };
+              }
+
               return {
                 ...address,
-                city: retrievedCity,
-                state: retrievedState,
+                state: state.toUpperCase(),
                 client_id: client.id,
               };
-            }
+            }),
+          );
 
-            return {
-              ...address,
-              state: state.toUpperCase(),
-              client_id: client.id,
-            };
-          }),
-        );
+          const addressesEntities = addressesData.map(address =>
+            transactionEntityManager.create(Address, address),
+          );
 
-        const createdAddresses = addressesData.map(address =>
-          transactionEntityManager.create(Address, address),
-        );
-
-        await transactionEntityManager.save(createdAddresses);
+          await transactionEntityManager.save(addressesEntities);
+        }
 
         return client;
       },
