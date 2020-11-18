@@ -1,4 +1,4 @@
-import { getManager, getRepository } from 'typeorm';
+import { getManager } from 'typeorm';
 import findCep from 'cep-promise';
 
 import Address from '../models/Address';
@@ -21,49 +21,82 @@ interface Request {
 
 class CreateClientService {
   public async execute({ name, addresses }: Request): Promise<Client> {
-    const clientRepository = getRepository(Client);
-    const addressRepository = getRepository(Address);
+    // const client = clientRepository.create({
+    //   name,
+    // });
 
-    const client = clientRepository.create({
-      name,
-    });
+    // const addressesDataPromises = addresses.map(async address => {
+    //   const { city, state, cep } = address;
 
-    const addressesDataPromises = addresses.map(async address => {
-      const { city, state, cep } = address;
+    //   if (!city || !state) {
+    //     const { city: retrievedCity, state: retrievedState } = await findCep(
+    //       cep,
+    //     );
+    //     return {
+    //       ...address,
+    //       city: retrievedCity,
+    //       state: retrievedState,
+    //       client_id: client.id,
+    //     };
+    //   }
 
-      if (!city || !state) {
-        const { city: retrievedCity, state: retrievedState } = await findCep(
-          cep,
+    //   return {
+    //     ...address,
+    //     state: state.toUpperCase(),
+    //     client_id: client.id,
+    //   };
+    // });
+
+    // const addressesData = await Promise.all(addressesDataPromises);
+
+    // const createdAddresses = addressesData.map(address =>
+    //   addressRepository.create(address),
+    // );
+
+    const newClient = await getManager().transaction(
+      async transactionEntityManager => {
+        const clientData = transactionEntityManager.create(Client, {
+          name,
+        });
+
+        const client = await transactionEntityManager.save(clientData);
+
+        const addressesData = await Promise.all(
+          addresses.map(async address => {
+            const { city, state, cep } = address;
+
+            if (!city || !state) {
+              const {
+                city: retrievedCity,
+                state: retrievedState,
+              } = await findCep(cep);
+              return {
+                ...address,
+                city: retrievedCity,
+                state: retrievedState,
+                client_id: client.id,
+              };
+            }
+
+            return {
+              ...address,
+              state: state.toUpperCase(),
+              client_id: client.id,
+            };
+          }),
         );
-        return {
-          ...address,
-          city: retrievedCity,
-          state: retrievedState,
-          client_id: client.id,
-        };
-      }
 
-      return {
-        ...address,
-        client_id: client.id,
-      };
-    });
+        const createdAddresses = addressesData.map(address =>
+          transactionEntityManager.create(Address, address),
+        );
 
-    const addressesData = await Promise.all(addressesDataPromises);
+        await transactionEntityManager.save(createdAddresses);
 
-    const createdAddresses = addressesData.map(address =>
-      addressRepository.create(address),
-    );
-
-    await getManager().transaction(
-      'SERIALIZABLE',
-      async transactionalEntityManager => {
-        await transactionalEntityManager.save(createdAddresses);
-        await transactionalEntityManager.save(client);
+        return client;
       },
     );
 
-    return client;
+    return newClient;
   }
 }
 
