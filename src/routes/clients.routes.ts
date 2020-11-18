@@ -7,7 +7,7 @@ import Client from '../models/Client';
 
 const clientsRouter = Router();
 
-interface CreateAddressRequest {
+interface CreateClientAddressRequest {
   street: string;
   number: string;
   neighborhood: string;
@@ -15,11 +15,17 @@ interface CreateAddressRequest {
   cep: string;
   city?: string;
   state?: string;
+  isMainAddress?: boolean;
+}
+
+interface CreateClientPhoneRequest {
+  number: string;
 }
 
 interface CreateClientRequest {
   name: string;
-  addresses: CreateAddressRequest[];
+  addresses?: CreateClientAddressRequest[];
+  phones?: CreateClientPhoneRequest[];
 }
 
 clientsRouter.get('/', async (request, response) => {
@@ -30,13 +36,14 @@ clientsRouter.get('/', async (request, response) => {
 });
 
 clientsRouter.post('/', async (request, response) => {
-  const { name, addresses } = request.body as CreateClientRequest;
+  const { name, addresses, phones } = request.body as CreateClientRequest;
 
   const createClientService = new CreateClientService();
 
   const client = await createClientService.execute({
     name,
     addresses,
+    phones,
   });
 
   return response.status(201).json(client);
