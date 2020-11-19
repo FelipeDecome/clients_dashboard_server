@@ -17,6 +17,9 @@ class Phone {
   @Column()
   number: string;
 
+  @Column('boolean')
+  is_whatsapp: boolean;
+
   @Column('uuid')
   client_id: string;
 
