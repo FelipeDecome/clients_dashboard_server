@@ -32,16 +32,6 @@ class Client {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  public main_address(): Address | null {
-    if (!this.main_address_id) return null;
-
-    const [main_address] = this.addresses.filter(
-      address => address.id === this.main_address_id,
-    );
-
-    return main_address;
-  }
 }
 
 export default Client;

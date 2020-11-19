@@ -20,7 +20,7 @@ interface AddressRequest {
   cep: string;
   city?: string;
   state?: string;
-  isMainAddress?: boolean;
+  is_main_address?: boolean;
 }
 
 interface PhoneRequest {
@@ -53,9 +53,9 @@ class CreateClientService {
         if (addresses) {
           const addressesData = await Promise.all(
             addresses.map(async (address, index) => {
-              const { city, state, cep, isMainAddress } = address;
+              const { city, state, cep, is_main_address } = address;
 
-              if (isMainAddress) mainAddress.index = index;
+              if (is_main_address) mainAddress.index = index;
 
               try {
                 const {
@@ -133,7 +133,11 @@ class CreateClientService {
           entities.phones = await transactionEntityManager.save(phonesEntities);
         }
 
-        if (mainAddress.index && entities.addresses) {
+        if (
+          mainAddress.index !== null &&
+          typeof mainAddress.index === 'number' &&
+          entities.addresses
+        ) {
           const savedAddresses = entities.addresses[mainAddress.index];
 
           const { id: main_address_id } = savedAddresses;
