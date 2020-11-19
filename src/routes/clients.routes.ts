@@ -20,6 +20,7 @@ interface CreateClientAddressRequest {
 
 interface CreateClientPhoneRequest {
   number: string;
+  is_whatsapp?: boolean;
 }
 
 interface CreateClientRequest {

@@ -25,6 +25,7 @@ interface AddressRequest {
 
 interface PhoneRequest {
   number: string;
+  is_whatsapp?: boolean;
 }
 
 interface Request {
@@ -109,7 +110,7 @@ class CreateClientService {
 
         if (phones) {
           const phonesData = phones.map(phone => {
-            const { number } = phone;
+            const { number, is_whatsapp } = phone;
             if (
               !/(?:^\([0]?[1-9]{2}\)|^[0]?[1-9]{2}[.-\s]?)[9]?[1-9]\d{3}[.-\s]?\d{4}$/.test(
                 number,
@@ -117,7 +118,11 @@ class CreateClientService {
             )
               throw new AppError('Número de telefone inválido.', 400);
 
-            return phone;
+            return {
+              number,
+              is_whatsapp,
+              client_id: client.id,
+            };
           });
 
           const phonesEntities = transactionEntityManager.create(
