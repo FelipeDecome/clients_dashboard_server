@@ -35,8 +35,10 @@ interface Request {
 
 class CreateClientService {
   public async execute({ name, addresses, phones }: Request): Promise<Client> {
-    const newClient = await getManager().transaction(
+    const createdClient = await getManager().transaction(
       async transactionEntityManager => {
+        if (!name) throw new AppError('O nome não pode estar vazio');
+
         const clientEntity = transactionEntityManager.create(Client, {
           name,
         });
@@ -54,32 +56,45 @@ class CreateClientService {
 
               if (isMainAddress) mainAddress.index = index;
 
-              if (!city || !state) {
-                try {
-                  const {
-                    city: retrievedCity,
-                    state: retrievedState,
-                  } = await findCep(cep);
+              try {
+                const {
+                  city: retrievedCity,
+                  state: retrievedState,
+                } = await findCep(cep);
 
+                const cityDoesntMatchCEP =
+                  city && city.toLowerCase() !== retrievedCity.toLowerCase();
+
+                const stateDoesntMatchCEP =
+                  state && state.toUpperCase() !== retrievedState.toUpperCase();
+
+                if (cityDoesntMatchCEP || stateDoesntMatchCEP)
+                  throw new AppError(
+                    'A Cidade ou Estado não condiz com o CEP informado.',
+                  );
+
+                if (!city || !state)
                   return {
                     ...address,
                     city: city || retrievedCity,
                     state: state?.toUpperCase() || retrievedState,
                     client_id: clientEntity.id,
                   };
-                } catch {
-                  throw new AppError(
-                    'Houve algum erro buscando pelo cep, verifique se o mesmo está correto',
-                    400,
-                  );
-                }
-              }
 
-              return {
-                ...address,
-                state: state.toUpperCase(),
-                client_id: clientEntity.id,
-              };
+                return {
+                  ...address,
+                  state: state.toUpperCase(),
+                  client_id: clientEntity.id,
+                };
+              } catch (err) {
+                if (err instanceof AppError)
+                  throw new AppError(err.message, err.statusCode);
+
+                throw new AppError(
+                  'Houve algum erro buscando pelo cep, verifique se o mesmo está correto',
+                  400,
+                );
+              }
             }),
           );
 
@@ -127,7 +142,7 @@ class CreateClientService {
       },
     );
 
-    return newClient;
+    return createdClient;
   }
 }
 
