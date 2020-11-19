@@ -42,4 +42,16 @@ clientsRouter.post('/', async (request, response) => {
   return response.status(201).json(client);
 });
 
+clientsRouter.put('/:id', async (request, response) => {
+  const { id } = request.params;
+
+  return response.json({ id });
+});
+
+clientsRouter.delete('/:id', async (request, response) => {
+  const { id } = request.params;
+
+  return response.json({ id });
+});
+
 export default clientsRouter;
