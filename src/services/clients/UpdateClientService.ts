@@ -1,9 +1,10 @@
 import { getRepository } from 'typeorm';
 import { validate } from 'uuid';
 
-import AppError from '../errors/AppError';
+import AppError from '../../errors/AppError';
+import Address from '../../models/Address';
 
-import Client from '../models/Client';
+import Client from '../../models/Client';
 
 interface Request {
   id: string;
@@ -24,18 +25,34 @@ class UpdateClientService {
     if (!name && !main_address_id)
       throw new AppError('Nenhum dado foi enviado para ser atualizado.');
 
+    const addressRepository = getRepository(Address);
+    const main_address = await addressRepository.findOne({
+      where: {
+        id: main_address_id,
+        client_id: id,
+      },
+    });
+
+    if (!main_address) throw new AppError('Esse ID de endereço não existe.');
+
     const clientsRepository = getRepository(Client);
     const clientToBeUpdated = await clientsRepository.findOne(id);
 
-    if (!clientToBeUpdated) throw new AppError('Esse ID de usuário não existe');
+    if (!clientToBeUpdated)
+      throw new AppError('Esse ID de usuário não existe.');
+
+    if (clientToBeUpdated.main_address_id === main_address_id)
+      throw new AppError(
+        'Esse endereço já está cadastrado como endereço principal.',
+      );
 
     clientToBeUpdated.name = name || clientToBeUpdated.name;
     clientToBeUpdated.main_address_id =
       main_address_id || clientToBeUpdated.main_address_id;
 
-    await clientsRepository.save(clientToBeUpdated);
+    const clientUpdated = await clientsRepository.save(clientToBeUpdated);
 
-    return clientToBeUpdated;
+    return clientUpdated;
   }
 }
 

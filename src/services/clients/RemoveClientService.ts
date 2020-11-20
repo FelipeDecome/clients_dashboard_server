@@ -1,8 +1,9 @@
 import { getRepository } from 'typeorm';
+import { validate } from 'uuid';
 
-import AppError from '../errors/AppError';
+import AppError from '../../errors/AppError';
 
-import Client from '../models/Client';
+import Client from '../../models/Client';
 
 interface Request {
   id: string;
@@ -10,6 +11,10 @@ interface Request {
 
 class RemoveClientService {
   public async execute({ id }: Request): Promise<void> {
+    const isIDValid = validate(id);
+
+    if (!isIDValid) throw new AppError('o ID informado é inválido.');
+
     const clientRepository = getRepository(Client);
 
     const clientToRemove = await clientRepository.findOne(id);

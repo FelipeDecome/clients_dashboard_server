@@ -1,45 +1,31 @@
 import { Router } from 'express';
 import { getRepository } from 'typeorm';
 
-import CreateClientService from '../services/CreateClientService';
+import CreateClientService from '../services/clients/CreateClientService';
+import RemoveClientService from '../services/clients/RemoveClientService';
+import UpdateClientService from '../services/clients/UpdateClientService';
 
 import Client from '../models/Client';
-import RemoveClientService from '../services/RemoveClientService';
-import UpdateClientService from '../services/UpdateClientService';
 
 const clientsRouter = Router();
 
-interface CreateClientAddressRequest {
-  street: string;
-  number: string;
-  neighborhood: string;
-  complement?: string;
-  cep: string;
-  city?: string;
-  state?: string;
-  is_main_address?: boolean;
-}
+clientsRouter.get('/:id?', async (request, response) => {
+  const { id } = request.params;
 
-interface CreateClientPhoneRequest {
-  number: string;
-  is_whatsapp?: boolean;
-}
-
-interface CreateClientRequest {
-  name: string;
-  addresses?: CreateClientAddressRequest[];
-  phones?: CreateClientPhoneRequest[];
-}
-
-clientsRouter.get('/', async (request, response) => {
   const clientRepository = getRepository(Client);
+
+  if (id) {
+    const client = await clientRepository.findOne(id);
+    return response.json(client);
+  }
+
   const clients = await clientRepository.find();
 
   return response.json(clients);
 });
 
 clientsRouter.post('/', async (request, response) => {
-  const { name, addresses, phones } = request.body as CreateClientRequest;
+  const { name, addresses, phones } = request.body;
 
   const createClientService = new CreateClientService();
 
